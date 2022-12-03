@@ -31,8 +31,9 @@ module Program =
                 // Run the daily challenges.
                 //
 
-                Day1.run()
+                //Day1.run()
                 //Day2.run()
+                Day3.run()
 
                 0
             with
