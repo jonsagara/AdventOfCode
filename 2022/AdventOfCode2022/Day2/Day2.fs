@@ -5,7 +5,7 @@ module Day2 =
     open System
     open System.IO
 
-    type Play =
+    type Shape =
         | Rock of string
         | Paper of string
         | Scissors of string
@@ -16,53 +16,53 @@ module Day2 =
         | Draw of score: int
 
     type Round =
-        { OpponentPlay: Play
+        { OpponentShape: Shape
           OpponentOutcome: Outcome
-          MyPlay: Play
+          MyShape: Shape
           MyOutcome: Outcome }
 
 
     let run () =
         let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day2_input.txt")
+        
         let inputFileLines = File.ReadAllLines(inputFilePath)
         printfn $"Lines read: {inputFileLines.Length}"    
 
-        let mapToPlay rawPlay =
-            match rawPlay with
-            | "A" | "X" -> Rock(rawPlay)
-            | "B" | "Y" -> Paper(rawPlay)
-            | "C" | "Z" -> Scissors(rawPlay)
-            | _ -> invalidArg (nameof rawPlay) ($"Invalid {nameof rawPlay} value: {rawPlay}")
+        let mapToShape rawShape =
+            match rawShape with
+            | "A" | "X" -> Rock(rawShape)
+            | "B" | "Y" -> Paper(rawShape)
+            | "C" | "Z" -> Scissors(rawShape)
+            | _ -> invalidArg (nameof rawShape) ($"Invalid {nameof rawShape} value: {rawShape}")
 
-        let scorePlay play =
-            match play with
+        let scoreShape shape =
+            match shape with
             | Rock _ -> 1
             | Paper _ -> 2
             | Scissors _ -> 3
 
-        let scoreRound myScore opponentScore =
-            if myScore > opponentScore then Win(myScore + 6)
-            elif myScore < opponentScore then Loss(myScore + 0)
-            else Draw(myScore + 3)
+        let scoreRound opponentShapeScore myShapeScore =
+            if opponentShapeScore > myShapeScore then Loss(myShapeScore + 0)
+            elif opponentShapeScore < myShapeScore then Win(myShapeScore + 6)
+            else Draw(myShapeScore + 3)
 
         let rounds =
             inputFileLines
-            |> Array.take 4
             |> Array.map (fun line ->
-                let plays = line.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+                let shapes = line.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
 
-                let opponentPlay = mapToPlay plays[0]
-                let opponentScore = scorePlay opponentPlay
+                let opponentShape = mapToShape shapes[0]
+                let opponentShapeScore = scoreShape opponentShape
 
-                let myPlay = mapToPlay plays[1]
-                let myScore = scorePlay myPlay
+                let myShape = mapToShape shapes[1]
+                let myShapeScore = scoreShape myShape
 
-                let opponentOutcome = scoreRound opponentScore myScore
-                let myOutcome = scoreRound myScore opponentScore
+                let opponentOutcome = scoreRound myShapeScore opponentShapeScore
+                let myOutcome = scoreRound opponentShapeScore myShapeScore
 
-                { OpponentPlay = opponentPlay
+                { OpponentShape = opponentShape
                   OpponentOutcome = opponentOutcome
-                  MyPlay = myPlay
+                  MyShape = myShape
                   MyOutcome = myOutcome })
 
         printfn $"Rounds mapped: {rounds.Length}"
@@ -90,5 +90,6 @@ module Day2 =
 
         printfn $"My total score is: {myTotalScore}"
 
-        rounds
-        |> Array.iter (fun r -> printfn "%A" r)
+        //printfn ""
+        //rounds
+        //|> Array.iter (fun r -> printfn "%A" r)
