@@ -6,9 +6,9 @@ module Day2 =
     open System.IO
 
     type Shape =
-        | Rock of rawShape : string * score : int
-        | Paper of rawShape : string * score : int
-        | Scissors of rawShape : string * score : int
+        | Rock
+        | Paper
+        | Scissors
 
     type Outcome =
         | Win of score: int
@@ -25,6 +25,21 @@ module Day2 =
         | Loser
         | Tie
         | Winner
+        
+        
+    [<Literal>]
+    let private LossScore = 0
+    [<Literal>]
+    let private DrawScore = 3
+    [<Literal>]
+    let private WinScore = 6
+    
+    [<Literal>]
+    let private RockScore = 1
+    [<Literal>]
+    let private PaperScore = 2
+    [<Literal>]
+    let private ScissorsScore = 3
 
 
     let run () =
@@ -35,22 +50,22 @@ module Day2 =
 
         let mapToShape rawShape =
             match rawShape with
-            | "A" | "X" -> Rock(rawShape, 1)
-            | "B" | "Y" -> Paper(rawShape, 2)
-            | "C" | "Z" -> Scissors(rawShape, 3)
+            | "A" | "X" -> Rock
+            | "B" | "Y" -> Paper
+            | "C" | "Z" -> Scissors
             | _ -> invalidArg (nameof rawShape) ($"Invalid {nameof rawShape} value: {rawShape}")
 
         let scoreRound opponentShape myShape =
             match opponentShape, myShape with
-            | (Rock _, Rock (_, myScore)) -> Draw(myScore + 3)
-            | (Rock _, Paper (_, myScore)) -> Win(myScore + 6)
-            | (Rock _, Scissors (_, myScore)) -> Loss(myScore + 0)
-            | (Paper _, Rock (_, myScore)) -> Loss(myScore + 0)
-            | (Paper _, Paper (_, myScore)) -> Draw(myScore + 3)
-            | (Paper _, Scissors (_, myScore)) -> Win(myScore + 6)
-            | (Scissors _, Rock (_, myScore)) -> Win(myScore + 6)
-            | (Scissors _, Paper (_, myScore)) -> Loss(myScore + 0)
-            | (Scissors _, Scissors (_, myScore)) -> Draw(myScore + 3)
+            | Rock, Rock -> Draw(RockScore + DrawScore)
+            | Rock, Paper -> Win(PaperScore + WinScore)
+            | Rock, Scissors -> Loss(ScissorsScore + LossScore)
+            | Paper, Rock -> Loss(RockScore + LossScore)
+            | Paper, Paper -> Draw(PaperScore + DrawScore)
+            | Paper, Scissors -> Win(ScissorsScore + WinScore)
+            | Scissors, Rock -> Win(RockScore + WinScore)
+            | Scissors, Paper -> Loss(PaperScore + LossScore)
+            | Scissors, Scissors -> Draw(ScissorsScore + DrawScore)
 
         let getOutcomeScore outcome =
             match outcome with
@@ -97,11 +112,7 @@ module Day2 =
         //
         // Part 2
         //
-
-        let splitLine (line : string) =
-            let shapes = line.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-            (shapes[0] |> mapToShape, shapes[1])
-
+        
         let mapToDesiredResult resultRaw =
             match resultRaw with
             | "X" -> Loser 
@@ -109,24 +120,26 @@ module Day2 =
             | "Z" -> Winner 
             | r -> invalidArg (nameof resultRaw) $"Invalid desired result raw value: {resultRaw}"
 
+        let splitLine (line : string) =
+            let shapes = line.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+            (shapes[0] |> mapToShape, shapes[1] |> mapToDesiredResult)
+
         let mapToDesiredShape opponentShape desiredResult =
             match opponentShape, desiredResult with
-            | Rock _, Loser -> Scissors(String.Empty, 3)
-            | Rock _, Tie -> Rock(String.Empty, 1)
-            | Rock _, Winner -> Paper(String.Empty, 2)
-            | Paper _, Loser -> Rock(String.Empty, 1)
-            | Paper _, Tie -> Paper(String.Empty, 2)
-            | Paper _, Winner -> Scissors(String.Empty, 3)
-            | Scissors _, Loser -> Paper(String.Empty, 2)
-            | Scissors _, Tie -> Scissors(String.Empty, 3)
-            | Scissors _, Winner -> Rock(String.Empty, 1)
+            | Rock, Loser -> Scissors
+            | Rock, Tie -> Rock
+            | Rock, Winner -> Paper
+            | Paper, Loser -> Rock
+            | Paper, Tie -> Paper
+            | Paper, Winner -> Scissors
+            | Scissors, Loser -> Paper
+            | Scissors, Tie -> Scissors
+            | Scissors, Winner -> Rock
 
         let rounds2 =
             inputFileLines
             |> Array.map(fun line ->
-                let (opponentShape, myResultRaw) = splitLine line
-                
-                let desiredResult = mapToDesiredResult myResultRaw
+                let (opponentShape, desiredResult) = splitLine line
                 let myDesiredShape = mapToDesiredShape opponentShape desiredResult
 
                 let opponentOutcome = scoreRound myDesiredShape opponentShape
