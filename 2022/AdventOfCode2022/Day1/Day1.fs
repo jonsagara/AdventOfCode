@@ -6,6 +6,10 @@ module Day1 =
     open System.Collections.Generic
     open System.IO
     open System.Linq
+    open Serilog
+
+    type private Marker = class end
+    let private _logger = Log.Logger.ForContext(typeof<Marker>.DeclaringType)
 
     type private Elf = { 
         Id: int
@@ -22,7 +26,7 @@ module Day1 =
 
         let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1_input.txt")
         let inputFileLines = File.ReadAllLines(inputFilePath)
-        printfn $"Lines read: {inputFileLines.Length}"
+        _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
             
         let groupMealsByElf (accum : ElfMealState) (calories : string) =
             
@@ -56,8 +60,7 @@ module Day1 =
                   TotalCalories = kvp.Value.Sum() })
 
         let mostCalsElf = elfMeals |> Array.maxBy (fun elf -> elf.TotalCalories)
-
-        printfn $"Elf {mostCalsElf.Id} had {mostCalsElf.TotalCalories} calories."
+        _logger.Information("Elf {mostCalsElfId} had {mostCalsElfTotalCalories} calories.", mostCalsElf.Id, mostCalsElf.TotalCalories)
 
 
         //
@@ -68,7 +71,7 @@ module Day1 =
             elfMeals |> Array.sortByDescending (fun e -> e.TotalCalories) |> Array.take 3
 
         top3Elves
-        |> Array.iter (fun e -> printfn $"Elf {e.Id} has {e.TotalCalories} calories.")
+        |> Array.iter (fun e -> _logger.Information("Elf {eId} has {eTotalCalories} calories.", e.Id, e.TotalCalories))
 
         let top3Sum = top3Elves |> Array.sumBy (fun e -> e.TotalCalories)
-        printfn $"Top 3 Elf calories total: {top3Sum}"
+        _logger.Information("Top 3 Elf calories total: {top3Sum}", top3Sum)

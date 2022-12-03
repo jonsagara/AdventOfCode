@@ -4,6 +4,10 @@ module Day2 =
 
     open System
     open System.IO
+    open Serilog
+
+    type private Marker = class end
+    let private _logger = Log.Logger.ForContext(typeof<Marker>.DeclaringType)
 
     type private Shape =
         | Rock
@@ -46,7 +50,7 @@ module Day2 =
         let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day2_input.txt")
         
         let inputFileLines = File.ReadAllLines(inputFilePath)
-        printfn $"Lines read: {inputFileLines.Length}"    
+        _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
 
         let mapToShape rawShape =
             match rawShape with
@@ -99,14 +103,14 @@ module Day2 =
             |> Array.map (fun r -> getOutcomeScore r.OpponentOutcome)
             |> Array.sum
 
-        printfn $"[Part 1] Opponent's total score is: {opponentsTotalScore}"
+        _logger.Information("[Part 1] Opponent's total score is: {opponentsTotalScore}", opponentsTotalScore)
 
         let myTotalScore =
             rounds
             |> Array.map (fun r -> getOutcomeScore r.MyOutcome)
             |> Array.sum
 
-        printfn $"[Part 1] My total score is: {myTotalScore}"
+        _logger.Information("[Part 1] My total score is: {myTotalScore}", myTotalScore)
 
 
         //
@@ -155,7 +159,7 @@ module Day2 =
             |> Array.map (fun r -> getOutcomeScore r.MyOutcome)
             |> Array.sum
 
-        printfn $"[Part 2] My total score is: {myTotalScore2}"
+        _logger.Information("[Part 2] My total score is: {myTotalScore2}", myTotalScore2)
 
 
 
