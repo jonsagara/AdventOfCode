@@ -5,23 +5,23 @@ module Day2 =
     open System
     open System.IO
 
-    type Shape =
+    type private Shape =
         | Rock
         | Paper
         | Scissors
 
-    type Outcome =
+    type private Outcome =
         | Win of score: int
         | Loss of score: int
         | Draw of score: int
 
-    type Round =
+    type private Round =
         { OpponentShape: Shape
           OpponentOutcome: Outcome
           MyShape: Shape
           MyOutcome: Outcome }
 
-    type DesiredOutcome = 
+    type private DesiredOutcome = 
         | Loser
         | Tie
         | Winner

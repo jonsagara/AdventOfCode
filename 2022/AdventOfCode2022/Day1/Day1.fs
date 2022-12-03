@@ -12,7 +12,7 @@ module Day1 =
         TotalCalories: int 
     }
     
-    type private State = {
+    type private ElfMealState = {
         IxLine : int
         IxElf : int
         ElfMeals : Dictionary<int, List<int>>
@@ -24,7 +24,7 @@ module Day1 =
         let inputFileLines = File.ReadAllLines(inputFilePath)
         printfn $"Lines read: {inputFileLines.Length}"
             
-        let folder (accum : State) (calories : string) =
+        let groupMealsByElf (accum : ElfMealState) (calories : string) =
             
             if String.IsNullOrWhiteSpace(calories) then
                 // The previous iteration was the last calorie count for the prior elf.
@@ -44,18 +44,18 @@ module Day1 =
                     
                 { accum with IxLine = accum.IxLine + 1 }
         
-        let resultState =
+        let elfMealState =
             inputFileLines
-            |> Array.fold folder { IxLine = 0; IxElf = 0; ElfMeals = Dictionary<int, List<int>>()}
+            |> Array.fold groupMealsByElf { IxLine = 0; IxElf = 0; ElfMeals = Dictionary<int, List<int>>()}
         
 
-        let elves =
-            resultState.ElfMeals.ToArray()
+        let elfMeals =
+            elfMealState.ElfMeals.ToArray()
             |> Array.map (fun kvp ->
                 { Id = kvp.Key
                   TotalCalories = kvp.Value.Sum() })
 
-        let mostCalsElf = elves |> Array.maxBy (fun elf -> elf.TotalCalories)
+        let mostCalsElf = elfMeals |> Array.maxBy (fun elf -> elf.TotalCalories)
 
         printfn $"Elf {mostCalsElf.Id} had {mostCalsElf.TotalCalories} calories."
 
@@ -65,7 +65,7 @@ module Day1 =
         //
 
         let top3Elves =
-            elves |> Array.sortByDescending (fun e -> e.TotalCalories) |> Array.take 3
+            elfMeals |> Array.sortByDescending (fun e -> e.TotalCalories) |> Array.take 3
 
         top3Elves
         |> Array.iter (fun e -> printfn $"Elf {e.Id} has {e.TotalCalories} calories.")
