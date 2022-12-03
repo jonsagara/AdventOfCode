@@ -11,38 +11,46 @@ module Day1 =
         Id: int
         TotalCalories: int 
     }
+    
+    type private State = {
+        IxLine : int
+        IxElf : int
+        ElfMeals : Dictionary<int, List<int>>
+    }
 
     let run () =
 
         let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1_input.txt")
         let inputFileLines = File.ReadAllLines(inputFilePath)
         printfn $"Lines read: {inputFileLines.Length}"
-
-        let elfMeals = Dictionary<int, List<int>>()
-
-        let mutable ixLine = 0
-        let mutable ixElf = 0
-
-        while ixLine < inputFileLines.Length do
-            let calories = inputFileLines[ixLine]
-
+            
+        let folder (accum : State) (calories : string) =
+            
             if String.IsNullOrWhiteSpace(calories) then
-                // Finished processing the previous elf. Assign a new Id for any subsequent elf.
-                ixElf <- ixLine
+                // The previous iteration was the last calorie count for the prior elf.
+                // Start a new line, and update the elf index for the next elf's meals,
+                //   if any.
+                { accum with
+                    IxLine = accum.IxLine + 1
+                    IxElf = accum.IxLine }
             else
-                match elfMeals.TryGetValue(ixElf) with
+                match accum.ElfMeals.TryGetValue(accum.IxElf) with
                 | true, meals ->
                     // We have already encountered this elf. Add the new meal to its list of meals.
                     meals.Add(Int32.Parse(calories))
                 | false, _ ->
                     // We have not yet seen this elf. Add them to the dictionary, and add the first meal.
-                    elfMeals[ixElf] <- List<int>([| Int32.Parse(calories) |])
-
-            ixLine <- ixLine + 1
+                    accum.ElfMeals[accum.IxElf] <- List<int>([| Int32.Parse(calories) |])
+                    
+                { accum with IxLine = accum.IxLine + 1 }
+        
+        let resultState =
+            inputFileLines
+            |> Array.fold folder { IxLine = 0; IxElf = 0; ElfMeals = Dictionary<int, List<int>>()}
         
 
         let elves =
-            elfMeals.ToArray()
+            resultState.ElfMeals.ToArray()
             |> Array.map (fun kvp ->
                 { Id = kvp.Key
                   TotalCalories = kvp.Value.Sum() })
