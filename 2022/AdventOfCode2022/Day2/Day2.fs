@@ -6,9 +6,9 @@ module Day2 =
     open System.IO
 
     type Shape =
-        | Rock of string
-        | Paper of string
-        | Scissors of string
+        | Rock of rawShape : string * score : int
+        | Paper of rawShape : string * score : int
+        | Scissors of rawShape : string * score : int
 
     type Outcome =
         | Win of score: int
@@ -30,21 +30,28 @@ module Day2 =
 
         let mapToShape rawShape =
             match rawShape with
-            | "A" | "X" -> Rock(rawShape)
-            | "B" | "Y" -> Paper(rawShape)
-            | "C" | "Z" -> Scissors(rawShape)
+            | "A" | "X" -> Rock(rawShape, 1)
+            | "B" | "Y" -> Paper(rawShape, 2)
+            | "C" | "Z" -> Scissors(rawShape, 3)
             | _ -> invalidArg (nameof rawShape) ($"Invalid {nameof rawShape} value: {rawShape}")
 
-        let scoreShape shape =
-            match shape with
-            | Rock _ -> 1
-            | Paper _ -> 2
-            | Scissors _ -> 3
+        let scoreRound opponentShape myShape =
+            match opponentShape, myShape with
+            | (Rock _, Rock (_, myScore)) -> Draw(myScore + 3)
+            | (Rock _, Paper (_, myScore)) -> Win(myScore + 6)
+            | (Rock _, Scissors (_, myScore)) -> Loss(myScore + 0)
+            | (Paper _, Rock (_, myScore)) -> Loss(myScore + 0)
+            | (Paper _, Paper (_, myScore)) -> Draw(myScore + 3)
+            | (Paper _, Scissors (_, myScore)) -> Win(myScore + 6)
+            | (Scissors _, Rock (_, myScore)) -> Win(myScore + 6)
+            | (Scissors _, Paper (_, myScore)) -> Loss(myScore + 0)
+            | (Scissors _, Scissors (_, myScore)) -> Draw(myScore + 3)
 
-        let scoreRound opponentShapeScore myShapeScore =
-            if opponentShapeScore > myShapeScore then Loss(myShapeScore + 0)
-            elif opponentShapeScore < myShapeScore then Win(myShapeScore + 6)
-            else Draw(myShapeScore + 3)
+        let getOutcomeScore outcome =
+            match outcome with
+            | Win winScore -> winScore
+            | Loss lossScore -> lossScore
+            | Draw drawScore -> drawScore
 
         let rounds =
             inputFileLines
@@ -52,13 +59,10 @@ module Day2 =
                 let shapes = line.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
 
                 let opponentShape = mapToShape shapes[0]
-                let opponentShapeScore = scoreShape opponentShape
-
                 let myShape = mapToShape shapes[1]
-                let myShapeScore = scoreShape myShape
 
-                let opponentOutcome = scoreRound myShapeScore opponentShapeScore
-                let myOutcome = scoreRound opponentShapeScore myShapeScore
+                let opponentOutcome = scoreRound myShape opponentShape
+                let myOutcome = scoreRound opponentShape myShape
 
                 { OpponentShape = opponentShape
                   OpponentOutcome = opponentOutcome
@@ -69,23 +73,14 @@ module Day2 =
 
         let opponentsTotalScore =
             rounds
-            |> Array.map (fun r ->
-                match r.OpponentOutcome with
-                | Win winScore -> winScore
-                | Loss lossScore -> lossScore
-                | Draw drawScore -> drawScore
-                )
+            |> Array.map (fun r -> getOutcomeScore r.OpponentOutcome)
             |> Array.sum
 
         printfn $"Opponent's total score is: {opponentsTotalScore}"
 
         let myTotalScore =
             rounds
-            |> Array.map (fun r ->
-                match r.MyOutcome with
-                | Win winScore -> winScore
-                | Loss lossScore -> lossScore
-                | Draw drawScore -> drawScore)
+            |> Array.map (fun r -> getOutcomeScore r.MyOutcome)
             |> Array.sum
 
         printfn $"My total score is: {myTotalScore}"
@@ -93,3 +88,25 @@ module Day2 =
         //printfn ""
         //rounds
         //|> Array.iter (fun r -> printfn "%A" r)
+
+        let myManualScore =
+            inputFileLines
+            |> Array.map (fun line ->
+                let shapes = line.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+
+                let round = (shapes[0], shapes[1])
+                match round with
+                | ("A", "X") -> 1 + 3 // rock vs. rock: draw
+                | ("A", "Y") -> 2 + 6 // rock vs. paper: win
+                | ("A", "Z") -> 3 + 0 // rock vs. scissors: loss
+                | ("B", "X") -> 1 + 0 // paper vs. rock: loss
+                | ("B", "Y") -> 2 + 3 // paper vs. paper: draw
+                | ("B", "Z") -> 3 + 6 // paper vs. scissors: win
+                | ("C", "X") -> 1 + 6 // scissors vs. rock: win
+                | ("C", "Y") -> 2 + 0 // scissors vs. paper: loss
+                | ("C", "Z") -> 3 + 3 // scissors vs. scissors: draw
+                | (x, y) -> invalidArg (nameof line) $"Line contains invalid shapes: {line}"
+                )
+            |> Array.sum
+
+        printfn $"My manual score is: {myManualScore}"
