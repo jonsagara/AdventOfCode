@@ -29,11 +29,11 @@ module Day3 =
         match letter with
         | l when l >= 'a' && l <= 'z' -> 
             let priority = (int(l) - 97) + 1
-            printfn $"Lowercase: {l} has priority {priority}"
+            //printfn $"Lowercase: {l} has priority {priority}"
             priority
         | l when l >= 'A' && l <= 'Z' ->
             let priority = (int(l) - 65) + 1 + 26
-            printfn $"Uppercase: {l} has priority {priority}"
+            //printfn $"Uppercase: {l} has priority {priority}"
             priority
         | _ -> invalidArg (nameof letter) $"Unsupported letter {letter}"
 
@@ -112,7 +112,37 @@ module Day3 =
                 )
             |> Array.sum
 
-        _logger.Information("The sum of priorities of item types is: {prioritySum}", prioritySum)
+        _logger.Information("[Part 1] The sum of priorities of item types is: {prioritySum}", prioritySum)
+
+
+        //
+        // Part 2
+        //
+
+        // Chunk the rucksacks into groups of three. Verify that all chunks are of size 3, and fail if they're not.
+        let rucksackChunks =
+            inputFileLines
+            |> Array.chunkBySize 3
+
+        let nonSize3Chunks =
+            rucksackChunks
+            |> Array.filter (fun rc -> rc.Length <> 3)
+
+        if nonSize3Chunks.Length > 0 then
+            invalidOp $"Unable to chunk all rucksacks into equal groups of 3 rucksacks"
+
+
+        let badgePrioritySum =
+            rucksackChunks
+            |> Array.map (fun rc -> 
+                // The spec says that there is exactly one common badge character per group of 3.
+                //   Blow things up if that's not true.
+                rc[0].Intersect(rc[1]).Intersect(rc[2]).Single())
+            |> Array.map (fun badgeChar -> mapToPriority badgeChar)
+            |> Array.sum
+
+        _logger.Information("[Part 2] The sum of badge priorities is: {badgePrioritySum}", badgePrioritySum)
+
 
         ()
 
