@@ -4,7 +4,6 @@ module Day4 =
 
     open System
     open System.IO
-    open System.Linq
     open Serilog
 
     type private Marker = class end
@@ -12,15 +11,15 @@ module Day4 =
 
     type private CleaningAssignments = {
         Line : int
-        Elf1 : int array
-        Elf2 : int array
+        Elf1 : Set<int>
+        Elf2 : Set<int>
         }
 
     /// range is a string that looks like "2-4". Split that string and expand into an
     /// array containing the entire range.
     let private expandRange (range : string) =
         let rangeParts = range.Split("-", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-        [| Int32.Parse(rangeParts[0]) .. Int32.Parse(rangeParts[1]) |]
+        seq { Int32.Parse(rangeParts[0]) .. Int32.Parse(rangeParts[1]) }
 
     let run () =
 
@@ -49,8 +48,8 @@ module Day4 =
 
                 // Expand each range of section ids into actual ids.
                 { Line = ix + 1
-                  Elf1 = expandRange ranges[0]
-                  Elf2 = expandRange ranges[1] })
+                  Elf1 = expandRange ranges[0] |> Set
+                  Elf2 = expandRange ranges[1] |> Set })
 
         // In how many assignment pairs does one range fully contain the other?
         let overlappingAssignments =
@@ -59,7 +58,7 @@ module Day4 =
                 // There's overlap if Elf1's assignments completely contain Elf2's, or vice versa.
                 //   If the difference between assignments is an empty set, then there is a complete
                 //   overlap. Check in both directions.
-                (ca.Elf1 |> Array.except ca.Elf2 |> Array.length = 0) || (ca.Elf2 |> Array.except ca.Elf1 |> Array.length = 0)
+                (ca.Elf1 |> Set.difference ca.Elf2 |> Set.count = 0) || (ca.Elf2 |> Set.difference ca.Elf1 |> Set.count = 0)
                 )
             |> Array.length
 
@@ -77,10 +76,7 @@ module Day4 =
                 // There's overlap if one or more of Elf1's assignments completely contain Elf2's, or 
                 //   vice versa. If the intersection of assignments is a non-empty set, then there is 
                 //   overlap. We only have to check one direction.
-                let elf1Set = ca.Elf1 |> Set.ofArray
-                let elf2Set = ca.Elf2 |> Set.ofArray
-
-                (elf1Set |> Set.intersect elf2Set |> Set.count > 0)
+                (ca.Elf1 |> Set.intersect ca.Elf2 |> Set.count > 0)
                 )
             |> Array.length
 
