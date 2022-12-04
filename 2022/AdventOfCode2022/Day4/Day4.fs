@@ -63,11 +63,27 @@ module Day4 =
                 )
             |> Array.length
 
-        _logger.Information("[Part 1] There are {overlappingAssignments} pairs with overlapping assignments.", overlappingAssignments)
+        _logger.Information("[Part 1] There are {overlappingAssignments} pairs with completely overlapping assignments.", overlappingAssignments)
 
 
         //
         // Part 2
         //
+
+        // In how many assignment pairs do the ranges overlap?
+        let anyOverlappingAssignments =
+            cleaningAssignments
+            |> Array.filter (fun ca ->
+                // There's overlap if one or more of Elf1's assignments completely contain Elf2's, or 
+                //   vice versa. If the intersection of assignments is a non-empty set, then there is 
+                //   overlap. We only have to check one direction.
+                let elf1Set = ca.Elf1 |> Set.ofArray
+                let elf2Set = ca.Elf2 |> Set.ofArray
+
+                (elf1Set |> Set.intersect elf2Set |> Set.count > 0)
+                )
+            |> Array.length
+
+        _logger.Information("[Part 2] There are {anyOverlappingAssignments} pairs with at least one overlapping assignment.", anyOverlappingAssignments)
 
         ()
