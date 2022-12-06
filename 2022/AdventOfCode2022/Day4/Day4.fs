@@ -76,7 +76,7 @@ module Day4 =
                 // There's overlap if one or more of Elf1's assignments completely contain Elf2's, or 
                 //   vice versa. If the intersection of assignments is a non-empty set, then there is 
                 //   overlap. We only have to check one direction.
-                (ca.Elf1 |> Set.intersect ca.Elf2 |> Set.count > 0)
+                ca.Elf1 |> Set.intersect ca.Elf2 |> Set.count > 0
                 )
             |> Array.length
 
