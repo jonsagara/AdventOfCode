@@ -89,21 +89,10 @@ module Day5 =
                 ixLabel <- ixLabel + 4
                 ixStack <- ixStack + 1
             
-            
-            // The first crate, if any, is at position 1.
-            
-            // inputFileLines[ixLine]
-            // |> splitLine
-            // |> Array.iteri (fun ixCrate crate ->
-            //     // This doesn't work. We need to figure out the crate's stack instead of just blindly parsing and adding.
-            //     let crateLabel = rxCrateId.Match(crate).Groups["label"].Value
-            //     cargoShip.CargoStacks[ixCrate].Crates.Push(crateLabel)
-            //     
-            //     
-            //     ())
             ())
 
-        printfn "%O" cargoShip
+        printfn $"{cargoShip}"
+        
         //
         // Part 1
         //
