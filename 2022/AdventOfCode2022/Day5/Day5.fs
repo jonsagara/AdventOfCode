@@ -33,7 +33,7 @@ module Day5 =
         // Read all of the lines in from the file.
         //
 
-        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day5_input_sample.txt")
+        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day5_input.txt")
         let inputFileLines = 
             File.ReadAllLines(inputFilePath) 
             // |> Array.map (fun l -> l.Trim())
@@ -112,12 +112,24 @@ module Day5 =
             let toStackId = Int32.Parse(lineParts[5])
             let ixToStack = toStackId - 1
 
-            // From 1 to quantity, start moving items from the "from" stack to the "to" stack, one at a time.
+            //// Part 1 logic: move one box at a time.
+            //// From 1 to quantity, start moving items from the "from" stack to the "to" stack, one at a time.
+            //[| 1 .. quantity |]
+            //|> Array.iter (fun _ ->
+            //    let crateToMove = cargoShip.Stacks[ixFromStack].Crates.Pop()
+            //    cargoShip.Stacks[ixToStack].Crates.Push(crateToMove)
+            //    ))
+
+            // Part 2 logic: move multiple boxes at a time.
+            let tempStack = Stack<string>()
             [| 1 .. quantity |]
-            |> Array.iter (fun _ ->
-                let crateToMove = cargoShip.Stacks[ixFromStack].Crates.Pop()
-                cargoShip.Stacks[ixToStack].Crates.Push(crateToMove)
-                ))
+            |> Array.iter (fun _ -> 
+                tempStack.Push(cargoShip.Stacks[ixFromStack].Crates.Pop()))
+
+            [| 1 .. quantity |]
+            |> Array.iter (fun _ -> 
+                cargoShip.Stacks[ixToStack].Crates.Push(tempStack.Pop())))
+
 
         
         //
