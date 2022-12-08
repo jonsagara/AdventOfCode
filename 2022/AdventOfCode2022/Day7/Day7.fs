@@ -8,6 +8,16 @@ module Day7 =
     type private Marker = class end
     let private _logger = Log.Logger.ForContext(typeof<Marker>.DeclaringType)
 
+    type NodeType =
+        | File
+        | Directory
+        
+    type FileSystemTreeNode = {
+        Name : string
+        Type : NodeType
+        FileSize : int64 option
+        Children : FileSystemTreeNode list
+    }
     
 
     let run () =
