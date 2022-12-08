@@ -26,7 +26,7 @@ module Day7 =
         // Read all of the lines in from the file.
         //
 
-        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day7_input.txt")
+        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day7_input_sample.txt")
         let inputFileLines = 
             File.ReadAllLines(inputFilePath) 
             |> Array.map (fun l -> l.Trim())
