@@ -16,13 +16,9 @@ module Day7 =
         
     type Node = {
         Name : string
-        Type : NodeType
-        FileSize : int64 option
+        // Type : NodeType
+        // FileSize : int64 option
         Children : Node list
-    }
-
-    type FileSystem = {
-        Root : Node option
     }
 
     let run () =
@@ -39,28 +35,18 @@ module Day7 =
 
         _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
 
-
-        let processLines (inputLines : string list) =
-
-            let rec loop accum lines =
-                match lines with
-                | [] -> 
-                    // There are no more lines to process.
-                    accum
-                | head::tails ->
-                    // head contains the current command or input line that we need to process and possibly
-                    //   add to the file system tree.
-                    // cd name: 
-                    //   * get a node with the given name. This is the new current node.
-                    //   -or- if none exists
-                    //   * create a new node and add it to the current file system node
-                    
-                    // cd ..: 
-                    // ls: noop - no changes to any node
-                    // {number} name -> create a new file node and add it to the current file system node
-                    // dir name -> create a new directory node and add it to the current file system node
-                    loop accum tails
-            ()
+        let processLines inputLines =
+            
+            if "cmd" = "cd" then
+                // Check the current directory's children for the specified directory.
+                //   If found, noop. Otherwise, create a new directory and add it to the children.
+                // Change to the specified directory. This really only affects the children
+                ()
+            elif "cmd" = "dir" then
+                // the next line(s) will list the contents of the current directory
+                ()
+            
+        
         
         ()
 
