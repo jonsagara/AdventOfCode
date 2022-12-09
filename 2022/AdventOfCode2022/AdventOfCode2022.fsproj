@@ -27,6 +27,7 @@
 		<Content Include="Day6\Day6_input.txt" />
 		<Content Include="Day6\Day6_input_sample.txt" />
 		<Compile Include="Day6\Day6.fs" />
+		<Content Include="day7\Da7_CSharp.txt" />
 		<Content Include="Day7\Day7_input.txt" />
 		<Content Include="Day7\Day7_input_sample.txt" />
 		<Compile Include="Day7\Day7.fs" />

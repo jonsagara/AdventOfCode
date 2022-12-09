@@ -1,0 +1,6 @@
+# http://editorconfig.org
+root = true
+
+[*.fs]
+indent_style = space
+indent_size = 4
