@@ -39,66 +39,29 @@ module Day7 =
 
         _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
 
-        //let fileSystemTree =
-        //    inputFileLines
-        //    |> Array.fold (fun accum line ->
-        //        match line[0] with
-        //        | '$' -> printfn $"This is a command: {line}"
-        //        | _ -> printfn $"This is either a directory or a file: {line}"
-        //        accum) (List<FileSystemTreeNode>())
 
-        let mapFileSystem (fileSystem : FileSystem) (inputFileLines : string list) =
+        let processLines (inputLines : string list) =
 
-            let rec loop (node : Node option) (lines : string list) =
+            let rec loop accum lines =
                 match lines with
                 | [] -> 
-                    // There are no more input commands to parse. Return the accumulator as-is.
-                    node
-                | head::tail -> 
-                    match head[0] with
-                    | '$' -> 
-                        // This is a command typed in by teh user.
-                        // The first element in the split string is the prompt '$', and can be ignore.
-                        // The second element is the command, either cd or ls.
-                        //   * cd has one argument (the directory to change to), and thus there will be three total parts.
-                        //   * ls has none, and thus there will be two parts.
-                        let commandParts = head.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-                        
-                        match commandParts[1] with
-                        | "cd" -> 
-                            // We're changing to a new directory. We may need to populate the node.
-                            printfn $"cd {commandParts[2]}"
-                            match node with
-                            | Some n ->
-                                // This node is already populated. Return it unchanged.
-                                loop node tail
-                                //loop (Some({ n with Name = commandParts[2]; Type = NodeType.Directory; FileSize = None; Children = [] })) tail
-                                ()
-                            | None ->
-                                ()
-
-                        | "ls" -> 
-                            // We're already in a directory. List its contents.
-                            printfn $"ls"
-                            loop node tail
-                        | _ -> invalidOp $"Invalid command {commandParts[1]}. line: {head}"
-
-                    | _ ->
-                        // This is output from the ls command.
-                        //   * If it starts with dir, it is the name of a directory.
-                        //   * If it starts with an integer, it is the size of the file and the file name.
-                        // Either way, there are two parts when you split the string.
-                        let outputParts = head.Split(" ", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-                        match outputParts[0] with
-                        | "dir" -> printfn $"This is a dir command: {outputParts[0]} {outputParts[1]}"
-                        | _ -> printfn $"This is a file: {outputParts[0]} {outputParts[1]}"
-
-
-                        loop node tail
-
-            loop (fileSystem.Root) inputFileLines
-
-        let filledFileSystem = mapFileSystem ({ Root = None }) inputFileLines
+                    // There are no more lines to process.
+                    accum
+                | head::tails ->
+                    // head contains the current command or input line that we need to process and possibly
+                    //   add to the file system tree.
+                    // cd name: 
+                    //   * get a node with the given name. This is the new current node.
+                    //   -or- if none exists
+                    //   * create a new node and add it to the current file system node
+                    
+                    // cd ..: 
+                    // ls: noop - no changes to any node
+                    // {number} name -> create a new file node and add it to the current file system node
+                    // dir name -> create a new directory node and add it to the current file system node
+                    loop accum tails
+            ()
+        
         ()
 
         
