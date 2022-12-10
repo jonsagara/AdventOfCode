@@ -13,7 +13,7 @@ module Day7 =
 
 
     //
-    // All credit to: https://github.com/paulp74/AdventOfCode2022/blob/main/Day07/Program.fs
+    // HEAVILY inspired by: https://github.com/paulp74/AdventOfCode2022/blob/main/Day07/Program.fs
     //
     // See Day7_CSharp.txt for my imperative C# solution.
     //
@@ -31,8 +31,16 @@ module Day7 =
         | File of name : string * size : int64
         | Directory of name : string * contents : Node list
 
+    /// A directory name and its total used space, which includes its files and all files in any subdirectories.
+    type private DirectorySize = {
+            Name : string
+            TotalSpaceUsed : int64
+        }
+
     let rec private processDirectory (stack : Stack<string>) name =
         let mutable line = ""
+
+        // Recursively populate this list with the directory's files, and also the contents of any subdirectories.
         let dirContents = [
             // Exit the loop if the stack runs out OR we change back to the parent directory.
             while stack.Count > 0 && line <> "$ cd .." do
@@ -57,8 +65,7 @@ module Day7 =
         Directory(name, dirContents)
 
     let private processStack (stack : Stack<string>) =
-        // Ignore the very first "cd /" line, and start processing with the initial directory assumed to
-        //   be "/".
+        // Ignore the very first "cd /" line, and start processing with the initial directory assumed to be "/".
         stack.Pop() |> ignore
         processDirectory stack "/"
 
@@ -69,7 +76,7 @@ module Day7 =
         // Read all of the lines in from the file.
         //
 
-        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day7_input_sample.txt")
+        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day7_input.txt")
 
         // Reverse the lines so that when we put them all onto the stack, they're popped off in their
         //   original order from the input file.
@@ -124,7 +131,8 @@ module Day7 =
                 // Add
                 actualSum + (contents |> List.sumBy sumBigDirectories)
             | File(_) ->
-                // We're not summing file sizes in this branch. We do it recursively above.
+                // Files have no subdirectories that we can recurse into. Count file sizes when processing
+                //   their containing directories.
                 0L
 
         let bigDirsSum = sumBigDirectories fileSystemRoot
@@ -133,9 +141,73 @@ module Day7 =
 
 
         //
-        // Part 2
+        // Part 2: Find the smallest directory that, if deleted, would free up enough space on the 
+        //   filesystem to run the update. What is the total size of that directory?
         //
 
-        //_logger.Information("[Part 2] Characters consumed until marker found: {charsConsumed}; line: {line}", charsConsumed, line |> left 50)
+        let totalDiskSpace = 70_000_000L
+        let requiredUnusedSpace = 30_000_000L
+        
+        // This only gets the total disk space. While, cool, it's ultimately not helpful in solving the problem.
+        //   We need a collection of directories and their sizes.
+        //let sumAllUsedSpace root =
+        //    let rec loop root =
+        //        match root with
+        //        // A file doesn't have child contents, so we can't recurse with it. Sum the file sizes
+        //        //   while handling directories.
+        //        | File (_) -> 0L
+        //        | Directory (_, contents) as d ->
+        //            // Sum the file sizes in the current directory.
+        //            let currentDirFileSizes = 
+        //                contents
+        //                |> List.sumBy (fun n ->
+        //                    match n with
+        //                    | File (_, size) -> size
+        //                    | Directory (_) -> 0L)
 
+        //            currentDirFileSizes + (contents |> List.sumBy loop)
+
+        //    loop root
+
+        //let currentUsedSpace = sumAllUsedSpace fileSystemRoot
+        //let unusedSpace = totalDiskSpace - currentUsedSpace
+        //let spaceToFree = requiredUnusedSpace - unusedSpace
+        //_logger.Information("Current used space: {currentUsedSpace:N0}; Unused space: {unusedSpace:N0}", currentUsedSpace, unusedSpace)
+        //_logger.Information("Space to free: {spaceToFree:N0}", spaceToFree)
+
+        
+        /// Returns a list of directory name/space total space used pairs.
+        let rec getDirectoriesSpaceUsed root =
+            match root with
+            | File(_) -> 
+                // We can't recurse into a file, so don't count their space here. Count them while descending
+                //   into directories.
+                List.empty
+            | Directory(name, contents) as d ->
+                let currentDirSpaceUsed = d |> sumContainedFiles
+
+                { Name = name; TotalSpaceUsed = currentDirSpaceUsed } :: (contents |> List.collect getDirectoriesSpaceUsed)
+
+        let directorySizes = getDirectoriesSpaceUsed fileSystemRoot
+        //directorySizes
+        //|> List.iter (fun ds -> _logger.Information("[Part 2] {name}: {size:N0}", ds.Name, ds.TotalSpaceUsed))
+
+        // The directory with the largest size is the root directory. That's the total space currently in use.
+        let currentUsedSpace = 
+            directorySizes 
+            |> List.maxBy (fun ds -> ds.TotalSpaceUsed) 
+            |> fun ds -> ds.TotalSpaceUsed
+        let unusedSpace = totalDiskSpace - currentUsedSpace
+        let spaceToFree = requiredUnusedSpace - unusedSpace
+        _logger.Information("[Part 2] Current used space: {currentUsedSpace:N0}; Unused space: {unusedSpace:N0}", currentUsedSpace, unusedSpace)
+        _logger.Information("[Part 2] Space to free: {spaceToFree:N0}", spaceToFree)
+
+        // The directory to delete is one that is >= the amount of space to free. If there are multiple,
+        //   choose the smallest one.
+        let directoryToDelete =
+            directorySizes
+            |> List.filter (fun ds -> ds.TotalSpaceUsed >= spaceToFree)
+            |> List.minBy (fun ds -> ds.TotalSpaceUsed)
+
+        _logger.Information("[Part 2] Delete directory {name} to free up {totalSpaceUsed:N0}", directoryToDelete.Name, directoryToDelete.TotalSpaceUsed)
         ()

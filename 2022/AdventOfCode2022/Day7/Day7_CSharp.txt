@@ -1,8 +1,7 @@
 /*
-    I tried doing it first in F# with recursion, because trees = recursion, right?
-
-    I ended up falling back to imperative code in C# just to get it working.
-
+// I tried doing it first in F# with recursion, because trees = recursion, right?
+// 
+// I ended up falling back to imperative code in C# just to get it working.
 void Main()
 {
     var lines = new[] 
