@@ -152,13 +152,7 @@ module Day8 =
         // Part 2: What is the highest scenic score possible for any tree?
         //
 
-        // Start at [0, 0] and go to [rowLength - 1, columnLength - 1]. For each element, it is visible
-        //   from outside the grid if any of the following are true:
-        //   * The tree is on one of the edges
-        //   * Every element above it thas a smaller numeric value
-        //   * Every element to the left of it has a smaller numeric value
-        //   * Every element below it has a smaller numeric value
-        //   * Every element to the right of it has a smaller numeric value
+        // Start at [0, 0] and go to [rowLength - 1, columnLength - 1]. Trees on an edge will have a scenic score of 0.
         let treeScenicScores = 
             [ for row in 0 .. rowMaxIndex do
                 for col in 0 .. colMaxIndex ->
@@ -237,7 +231,6 @@ module Day8 =
         let maxScenicScore =
             treeScenicScores
             |> List.maxBy (fun tss -> tss.Score)
-            |> fun tss -> tss.Score
 
-        _logger.Information("[Part 2] The max scenic score is {maxScenicScore:N0}.", maxScenicScore)
+        _logger.Information("[Part 2] The max scenic score is {maxScenicScore:N0} at [{row}, {col}].", maxScenicScore.Score, maxScenicScore.Row, maxScenicScore.Column)
         ()
