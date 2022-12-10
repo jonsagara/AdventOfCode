@@ -34,7 +34,7 @@ module Day7 =
     let rec private processDirectory (stack : Stack<string>) name =
         let mutable line = ""
         let dirContents = [
-            while stack.Count > 0 do
+            while stack.Count > 0 && line <> "$ cd .." do
                 line <- stack.Pop()
                 match line with
                 | Regex @"\$ ls" _
