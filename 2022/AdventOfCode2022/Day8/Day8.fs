@@ -16,16 +16,25 @@ module Day8 =
         Visible : bool
         }
 
-    let isEdgeTree row column rowLength columnLength =
-        if row = 0 || row = rowLength - 1 then
+    type private ScenicTree = {
+        Row : int
+        Column : int
+        Value : int
+        Score : int
+        }
+
+    /// True if the tree is on the top, left, bottom, or right edge; false otherwise.
+    let isEdgeTree row column rowMaxIndex colMaxIndex =
+        if row = 0 || row = rowMaxIndex then
             // Tree is in the top or bottom row.
             true
-        else if column = 0 || column = columnLength - 1 then
+        else if column = 0 || column = colMaxIndex then
             // Tree is in the left-most or right-most column.
             true
         else
             // Tree is somewhere in the middle.
             false
+
 
     let run () =
 
@@ -46,6 +55,10 @@ module Day8 =
         let innerDimension = inputFileLines[0].Length
         _logger.Information("Create a int[{outerDimension}][{innerDimension}]", outerDimension, innerDimension)
 
+        let rowMaxIndex = outerDimension - 1
+        let colMaxIndex = innerDimension - 1
+
+        // Initialize with an invalid value. If we see it later on, we know we didn't populate the grid correctly.
         let grid = Array2D.create outerDimension innerDimension -1
 
         // Iterate through each line in the file, and through each character in each line, to populate the array.
@@ -65,10 +78,10 @@ module Day8 =
         //|> Array2D.iteri (fun i j value -> 
         //    printfn $"grid[{i}][{j}] = {value}")
 
-        // All trees in the outer edges are visible. Subtract two each from Left and Right so that we don't count 
-        //   the corners twice.
-        let outerEdgesVisibleCount = (2 * outerDimension) + (2 * innerDimension) - 4
-        _logger.Information("Outer edge visible trees count: {outerEdgesVisibleCount:N0}", outerEdgesVisibleCount)
+        //// All trees in the outer edges are visible. Subtract two each from Left and Right so that we don't count 
+        ////   the corners twice.
+        //let outerEdgesVisibleCount = (2 * outerDimension) + (2 * innerDimension) - 4
+        //_logger.Information("Outer edge visible trees count: {outerEdgesVisibleCount:N0}", outerEdgesVisibleCount)
 
         // Start at [0, 0] and go to [rowLength - 1, columnLength - 1]. For each element, it is visible
         //   from outside the grid if any of the following are true:
@@ -78,8 +91,8 @@ module Day8 =
         //   * Every element below it has a smaller numeric value
         //   * Every element to the right of it has a smaller numeric value
         let treeVisibilities = 
-            [ for row in 0 .. outerDimension - 1 do
-                for col in 0 .. innerDimension - 1 ->
+            [ for row in 0 .. rowMaxIndex do
+                for col in 0 .. colMaxIndex ->
                     if isEdgeTree row col outerDimension innerDimension then
                         { Row = row; Column = col; Value = grid[row, col]; Visible = true }
                     else
@@ -99,13 +112,13 @@ module Day8 =
                         
                         // Check visibility from the bottom
                         let visibleFromBottom = 
-                            let rowsToCheck = [ row + 1 .. outerDimension - 1 ]
+                            let rowsToCheck = [ row + 1 .. rowMaxIndex ]
                             rowsToCheck
                             |> List.forall (fun checkRow -> grid[checkRow, col] < currentTreeHeight)
 
                         // Check visibility from the right
                         let visibleFromRight = 
-                            let columnsToCheck = [ col + 1 .. innerDimension - 1]
+                            let columnsToCheck = [ col + 1 .. colMaxIndex ]
                             columnsToCheck
                             |> List.forall (fun checkCol -> grid[row, checkCol] < currentTreeHeight)
 
@@ -136,8 +149,54 @@ module Day8 =
 
 
         //
-        // Part 2
+        // Part 2: What is the highest scenic score possible for any tree?
         //
+
+        // Start at [0, 0] and go to [rowLength - 1, columnLength - 1]. For each element, it is visible
+        //   from outside the grid if any of the following are true:
+        //   * The tree is on one of the edges
+        //   * Every element above it thas a smaller numeric value
+        //   * Every element to the left of it has a smaller numeric value
+        //   * Every element below it has a smaller numeric value
+        //   * Every element to the right of it has a smaller numeric value
+        let treeScenicScores = 
+            [ for row in 0 .. rowMaxIndex do
+                for col in 0 .. colMaxIndex ->
+                    if isEdgeTree row col outerDimension innerDimension then
+                        { Row = row; Column = col; Value = grid[row, col]; Visible = true }
+                    else
+                        let currentTreeHeight = grid[row, col]
+
+                        // Visible from the top IFF every tree above it has a lower value.
+                        let visibleFromTop = 
+                            let rowsToCheck = [ row - 1 .. -1 .. 0]
+                            rowsToCheck
+                            |> List.forall (fun checkRow -> grid[checkRow, col] < currentTreeHeight)
+
+                        // Check visibility from the left
+                        let visibleFromLeft = 
+                            let columnsToCheck = [ 0 .. col - 1]
+                            columnsToCheck
+                            |> List.forall (fun checkCol -> grid[row, checkCol] < currentTreeHeight)
+                        
+                        // Check visibility from the bottom
+                        let visibleFromBottom = 
+                            let rowsToCheck = [ row + 1 .. rowMaxIndex ]
+                            rowsToCheck
+                            |> List.forall (fun checkRow -> grid[checkRow, col] < currentTreeHeight)
+
+                        // Check visibility from the right
+                        let visibleFromRight = 
+                            let columnsToCheck = [ col + 1 .. colMaxIndex ]
+                            columnsToCheck
+                            |> List.forall (fun checkCol -> grid[row, checkCol] < currentTreeHeight)
+
+                        let visible = visibleFromTop || visibleFromLeft || visibleFromBottom || visibleFromRight
+
+                        { Row = row; Column = col; Value = grid[row, col]; Visible = visible }
+            ]
+
+
 
         //_logger.Information("[Part 2] Characters consumed until marker found: {charsConsumed}; line: {line}", charsConsumed, line |> left 50)
         ()
