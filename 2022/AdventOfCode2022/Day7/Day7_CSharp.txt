@@ -1,4 +1,4 @@
-(*
+/*
     I tried doing it first in F# with recursion, because trees = recursion, right?
 
     I ended up falling back to imperative code in C# just to get it working.
@@ -187,4 +187,4 @@ public class Node
     public List<Node> Children { get; private set; } = new();
 }
 
-*)
+*/
