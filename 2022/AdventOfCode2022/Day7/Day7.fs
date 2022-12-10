@@ -148,7 +148,7 @@ module Day7 =
         let totalDiskSpace = 70_000_000L
         let requiredUnusedSpace = 30_000_000L
         
-        // This only gets the total disk space. While, cool, it's ultimately not helpful in solving the problem.
+        // This only gets the total disk space. While cool, it's ultimately not helpful in solving the problem.
         //   We need a collection of directories and their sizes.
         //let sumAllUsedSpace root =
         //    let rec loop root =
