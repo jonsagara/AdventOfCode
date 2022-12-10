@@ -163,40 +163,81 @@ module Day8 =
             [ for row in 0 .. rowMaxIndex do
                 for col in 0 .. colMaxIndex ->
                     if isEdgeTree row col rowMaxIndex colMaxIndex then
-                        { Row = row; Column = col; Value = grid[row, col]; Visible = true }
+                        // Any edge tree will have at least one 0 score, thus its scenic score will also be 0.
+                        { Row = row; Column = col; Value = grid[row, col]; Score = 0 }
                     else
+
                         let currentTreeHeight = grid[row, col]
 
-                        // Visible from the top IFF every tree above it has a lower value.
-                        let visibleFromTop = 
+                        // Look up: stop if you reach an edge or the first tree whose height is >= the current tree.
+                        //   The count of trees is the viewing distance.
+                        let lookUpTreeCount = 
                             let rowsToCheck = [ row - 1 .. -1 .. 0]
-                            rowsToCheck
-                            |> List.forall (fun checkRow -> grid[checkRow, col] < currentTreeHeight)
+                            // takeWhile doesn't work in the case where, if the current tree is 5, the rows above it
+                            //   are 3, 5, and 3. It goes all the way to the edge instead of stopping at 5.
+                            //rowsToCheck
+                            //|> List.takeWhile (fun ixRowCheck -> grid[ixRowCheck, col] <= currentTreeHeight)
+                            //|> List.length
+                            let firstBlockingTreeRowIndex =
+                                rowsToCheck
+                                |> List.tryFindIndex (fun ixRowCheck -> grid[ixRowCheck, col] >= currentTreeHeight)
 
-                        // Check visibility from the left
-                        let visibleFromLeft = 
-                            let columnsToCheck = [ 0 .. col - 1]
-                            columnsToCheck
-                            |> List.forall (fun checkCol -> grid[row, checkCol] < currentTreeHeight)
-                        
-                        // Check visibility from the bottom
-                        let visibleFromBottom = 
+                            match firstBlockingTreeRowIndex with
+                            | Some index -> index + 1
+                            | None -> row
+
+                        // Look left: stop if you reach an edge or the first tree whose height is >= the current tree.
+                        //   The count of trees is the viewing distance.
+                        let lookLeftTreeCount = 
+                            let colsToCheck = [ col - 1 .. -1 .. 0 ]
+                            let firstBlockingTreeColIndex = 
+                                colsToCheck
+                                |> List.tryFindIndex (fun ixColCheck -> grid[row, ixColCheck] >= currentTreeHeight)
+
+                            match firstBlockingTreeColIndex with
+                            | Some index -> index + 1
+                            | None -> col
+
+                        // Look right: stop if you reach an edge or the first tree whose height is >= the current tree.
+                        //   The count of trees is the viewing distance.
+                        let lookRightTreeCount = 
+                            let colsToCheck = [ col + 1 .. colMaxIndex ]
+                            let firstBlockingTreeColIndex =
+                                colsToCheck
+                                |> List.tryFindIndex (fun ixColCheck -> grid[row, ixColCheck] >= currentTreeHeight)
+
+                            match firstBlockingTreeColIndex with
+                            | Some index -> index + 1
+                            | None -> colMaxIndex - col
+
+                        // Look down: stop if you reach an edge or the first tree whose height is >= the current tree.
+                        //   The count of trees is the viewing distance.
+                        let lookDownTreeCount = 
                             let rowsToCheck = [ row + 1 .. rowMaxIndex ]
-                            rowsToCheck
-                            |> List.forall (fun checkRow -> grid[checkRow, col] < currentTreeHeight)
+                            let firstBlockingTreeRowIndex =
+                                rowsToCheck
+                                |> List.tryFindIndex (fun ixRowCheck -> grid[ixRowCheck, col] >= currentTreeHeight)
 
-                        // Check visibility from the right
-                        let visibleFromRight = 
-                            let columnsToCheck = [ col + 1 .. colMaxIndex ]
-                            columnsToCheck
-                            |> List.forall (fun checkCol -> grid[row, checkCol] < currentTreeHeight)
+                            match firstBlockingTreeRowIndex with
+                            | Some index -> index + 1
+                            | None -> rowMaxIndex - row
 
-                        let visible = visibleFromTop || visibleFromLeft || visibleFromBottom || visibleFromRight
+                        
+                        let scenicScore = lookUpTreeCount * lookLeftTreeCount * lookRightTreeCount * lookDownTreeCount
 
-                        { Row = row; Column = col; Value = grid[row, col]; Visible = visible }
+                        { Row = row; Column = col; Value = grid[row, col]; Score = scenicScore }
             ]
 
+        //DEBUG:
+        //treeScenicScores
+        //|> List.iter (fun tss ->
+        //    printfn $"[{tss.Row}][{tss.Column}] Scenic Score = {tss.Score}"
+        //    )
 
+        let maxScenicScore =
+            treeScenicScores
+            |> List.maxBy (fun tss -> tss.Score)
+            |> fun tss -> tss.Score
 
-        //_logger.Information("[Part 2] Characters consumed until marker found: {charsConsumed}; line: {line}", charsConsumed, line |> left 50)
+        _logger.Information("[Part 2] The max scenic score is {maxScenicScore:N0}.", maxScenicScore)
         ()
