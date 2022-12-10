@@ -93,7 +93,7 @@ module Day8 =
         let treeVisibilities = 
             [ for row in 0 .. rowMaxIndex do
                 for col in 0 .. colMaxIndex ->
-                    if isEdgeTree row col outerDimension innerDimension then
+                    if isEdgeTree row col rowMaxIndex colMaxIndex then
                         { Row = row; Column = col; Value = grid[row, col]; Visible = true }
                     else
                         let currentTreeHeight = grid[row, col]
@@ -162,7 +162,7 @@ module Day8 =
         let treeScenicScores = 
             [ for row in 0 .. rowMaxIndex do
                 for col in 0 .. colMaxIndex ->
-                    if isEdgeTree row col outerDimension innerDimension then
+                    if isEdgeTree row col rowMaxIndex colMaxIndex then
                         { Row = row; Column = col; Value = grid[row, col]; Visible = true }
                     else
                         let currentTreeHeight = grid[row, col]
