@@ -46,9 +46,6 @@ module Day9 =
         HeadCount : int
         TailCount : int
     }
-    
-    let private initialVisit () =
-        { HeadCount = 0; TailCount = 0 }
 
     /// <summary>
     /// Get the new value for Tail's X or Y coordinate. If passing X for Head, then also pass X for
@@ -122,40 +119,6 @@ module Day9 =
                 let yIncrement = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
                 { tailLocation with X = tailLocation.X + xIncrement; Y = tailLocation.Y + yIncrement }
 
-    // This implementation is faulty. If Tail already touches Head or is diagonally adjacent,
-    //   then tail shouldn't move.
-    //let private getNewTailLocation newHeadLocation tailLocation =
-    //    if newHeadLocation.X = tailLocation.X && newHeadLocation.Y = tailLocation.Y then
-    //        // Head moved to where Tail currently is. Leave Tail's location unchanged.
-    //        { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
-    //    elif newHeadLocation.X = tailLocation.X then
-    //        // Head moved to the same X as Tail. They have different Ys. Move Tails's Y
-    //        //   one location closer to Head.
-    //        let increment = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
-    //        { tailLocation with Y = tailLocation.Y + increment }
-    //    elif newHeadLocation.Y = tailLocation.Y then
-    //        // Head moved to the same Y as Tail. They have different Xs. Move Tail's X
-    //        //   one location closer to Head.
-    //        let increment = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
-    //        { tailLocation with X = tailLocation.X + increment }
-    //    else
-    //        // Head moved to a different X and Y than Tail. If they're not diagonally adjacent, move
-    //        //   Tail diagonally to catch up to Head.
-    //        // They're diagonally adjacent if they're within 1 in the X and Y dimension.
-    //        let xDiff = Math.Abs(newHeadLocation.X - tailLocation.X)
-    //        let yDiff = Math.Abs(newHeadLocation.Y - tailLocation.Y)
-                                
-    //        if xDiff = 1 && yDiff = 1 then
-    //            // Tail is diagonally adjacent to Head. Tail can remain where it is.
-    //            { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
-    //        else
-    //            // Tail is >= 1 away from Head in X and >= 1 away in Y. Regardless of the actual
-    //            //   distance, we're only going to move Tail diagonally one space to be just above or
-    //            //   below Head.
-    //            let xIncrement = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
-    //            let yIncrement = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
-    //            { tailLocation with X = tailLocation.X + xIncrement; Y = tailLocation.Y + yIncrement }
-
     let run () =
 
         //
@@ -174,11 +137,11 @@ module Day9 =
             inputFileLines
             |> Array.map toCommand
         
-        let rootHeadLocation = { X = 0; Y = 0 }
-        let rootTailLocation = { X = 0; Y = 0 }
-        let rootLocationVisitsDict = dict [
-            // This contains both the initial Head and Tail visit counts.
-            (rootHeadLocation, initialVisit())
+        // We assume that Head and Tail both start in the same location. We also count this as a
+        //   visit for both.
+        let initialLocation = { X = 0; Y = 0 }
+        let initialLocationVisitsDict = dict [
+            (initialLocation, { HeadCount = 1; TailCount = 1 })
         ]
         
         let (finalHeadLocation, finalTailLocation, visits) =
@@ -187,18 +150,20 @@ module Day9 =
                 match cmd.Direction with
                 | Up -> 
                     // Move Count steps Up, incrementing the Head and Tail visits as appropriate.
+                    //BUG: we need to pass the updated headLocation, not keep reusing the original.
 
                     [ 1 .. cmd.Count ]
                     |> List.map (fun _ ->
-                        // Move Head one location Up.
+                        // Move Head one location Up and increment its visit count.
                         let newHeadLocation = { headLocation with Y = headLocation.Y + 1 }
+                        incrementHeadVisitCount locationVisits newHeadLocation
 
                         // Update the Tail location to keep up with the Head.
                         let newTailLocation = getNewTailLocation newHeadLocation tailLocation
 
-                        // Update the location visit counts for Head and Tail.
-                        incrementHeadVisitCount locationVisits newHeadLocation
-                        incrementTailVisitCount locationVisits newTailLocation
+                        // Only increment Tail's visit count if its location changed.
+                        if newTailLocation <> tailLocation then do
+                            incrementTailVisitCount locationVisits newTailLocation
 
                         (newHeadLocation, newTailLocation, locationVisits))
                     |> List.rev
@@ -206,18 +171,20 @@ module Day9 =
 
                 | Down -> 
                     // Move Count steps Down, incrementing the Head and Tail visits as appropriate.
+                    //BUG: we need to pass the updated headLocation, not keep reusing the original.
 
                     [ 1 .. cmd.Count ]
                     |> List.map (fun _ ->
-                        // Move Head one location Down.
+                        // Move Head one location Down and increment its visit count.
                         let newHeadLocation = { headLocation with Y = headLocation.Y - 1 }
+                        incrementHeadVisitCount locationVisits newHeadLocation
 
                         // Update the Tail location to keep up with the Head.
                         let newTailLocation = getNewTailLocation newHeadLocation tailLocation
 
-                        // Update the location visit counts for Head and Tail.
-                        incrementHeadVisitCount locationVisits newHeadLocation
-                        incrementTailVisitCount locationVisits newTailLocation
+                        // Only increment Tail's visit count if its location changed.
+                        if newTailLocation <> tailLocation then do
+                            incrementTailVisitCount locationVisits newTailLocation
 
                         (newHeadLocation, newTailLocation, locationVisits))
                     |> List.rev
@@ -225,18 +192,20 @@ module Day9 =
 
                 | Left ->
                     // Move Count steps to the Left, incrementing the Head and Tail visits as appropriate.
+                    //BUG: we need to pass the updated headLocation, not keep reusing the original.
 
                     [ 1 .. cmd.Count]
                     |> List.map (fun _ ->
-                        // Move Head one location to the left.
+                        // Move Head one location to the left and increment its visit count.
                         let newHeadLocation = { headLocation with X = headLocation.X - 1 }
+                        incrementHeadVisitCount locationVisits newHeadLocation
 
                         // Update the Tail location to keep up with the Head.
                         let newTailLocation = getNewTailLocation newHeadLocation tailLocation
 
-                        // Update the location visit counts for Head and Tail.
-                        incrementHeadVisitCount locationVisits newHeadLocation
-                        incrementTailVisitCount locationVisits newTailLocation
+                        // Only increment Tail's visit count if its location changed.
+                        if newTailLocation <> tailLocation then do
+                            incrementTailVisitCount locationVisits newTailLocation
 
                         (newHeadLocation, newTailLocation, locationVisits))
                     |> List.rev
@@ -244,24 +213,26 @@ module Day9 =
 
                 | Right ->
                     // Move Count steps to the Right, incrementing the Head and Tail visits as appropriate.
+                    //BUG: we need to pass the updated headLocation, not keep reusing the original.
 
                     [ 1 .. cmd.Count ]
                     |> List.map (fun _ ->
-                        // Move Head one location to the right.
+                        // Move Head one location to the right and increment its visit count.
                         let newHeadLocation = { headLocation with X = headLocation.X + 1 }
+                        incrementHeadVisitCount locationVisits newHeadLocation
                         
                         // Update the Tail location to keep up with the Head.
                         let newTailLocation = getNewTailLocation newHeadLocation tailLocation
                         
-                        // Update the location visit counts for Head and Tail.
-                        incrementHeadVisitCount locationVisits newHeadLocation
-                        incrementTailVisitCount locationVisits newTailLocation
+                        // Only increment Tail's visit count if its location changed.
+                        if newTailLocation <> tailLocation then do
+                            incrementTailVisitCount locationVisits newTailLocation
                         
                         (newHeadLocation, newTailLocation, locationVisits))
                     |> List.rev
                     |> List.head
                 
-                ) ((rootHeadLocation, rootTailLocation, Dictionary<Location, Visit>(rootLocationVisitsDict)))
+                ) ((initialLocation, initialLocation, Dictionary<Location, Visit>(initialLocationVisitsDict)))
         
         
         //
