@@ -77,7 +77,7 @@ module Day9 =
         
         let (finalHeadLocation, finalTailLocation, visits) =
             commands
-            |> Array.fold (fun (headLocation, tailLocation, locationVisits) cmd ->
+            |> Array.fold (fun (headLocation, tailLocation, locationVisits : Dictionary<Location, Visit>) cmd ->
                 match cmd.Direction with
                 | Up -> ()
                 | Down -> ()
@@ -86,29 +86,62 @@ module Day9 =
                     // Move Count steps to the Right, incrementing the Head and Tail visits
                     //   as appropriate.
                     [ 1 .. cmd.Count ]
-                    |> List.iter (fun x ->
+                    |> List.iter (fun _ ->
                         // Move one location to the right.
                         let newHeadLocation = { headLocation with X = headLocation.X + 1 }
                         
                         // Update the tail location to keep up with the head.
-                        let newTaiLocation =
+                        let newTailLocation =
                             if newHeadLocation.X = tailLocation.X && newHeadLocation.Y = tailLocation.Y then
                                 // Head moved to where Tail currently is. Leave Tail's location unchanged.
                                 { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
-                            else if newHeadLocation.X = tailLocation.X then
+                            elif newHeadLocation.X = tailLocation.X then
                                 // Head moved to the same X as Tail. They have different Ys. Move Tails's Y
                                 //   one location closer to Head.
-                                ()
-                            else if newHeadLocation.Y = tailLocation.Y then
+                                let increment = if newHeadLocation.Y > tailLocation.Y then 1 else -1 
+                                { tailLocation with Y = tailLocation.Y + increment }
+                            elif newHeadLocation.Y = tailLocation.Y then
                                 // Head moved to the same Y as Tail. They have different Xs. Move Tail's X
                                 //   one location closer to Head.
-                                ()
+                                let increment = if newHeadLocation.X > tailLocation.X then 1 else -1
+                                { tailLocation with X = tailLocation.X + increment }
                             else
-                                // Head move to a different X and Y than Tail. Move Tail diagonally to catch up
-                                //   to Head.
-                                ()
+                                // Head moved to a different X and Y than Tail. If they're not diagonally adjacent, move
+                                //   Tail diagonally to catch up to Head.
+                                // They're diagonally adjacent if they're within 1 in the X and Y dimension.
+                                let xDiff = Math.Abs(newHeadLocation.X - tailLocation.X)
+                                let yDiff = Math.Abs(newHeadLocation.Y - tailLocation.Y)
+                                
+                                if xDiff = 1 && yDiff = 1 then
+                                    // Tail is diagonally adjacent to Head. Tail can remain where it is.
+                                    { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
+                                // elif xDiff = 1 then
+                                else
+                                    // Tail is only 1 away from Head in X, but > 1 away in Y. Move Tail diagonally to be
+                                    //   just above or below Head.
+                                    let xIncrement = if newHeadLocation.X > tailLocation.X then 1 else -1
+                                    let yIncrement = if newHeadLocation.Y > tailLocation.Y then 1 else -1
+                                    { tailLocation with X = tailLocation.X + xIncrement; Y = tailLocation.Y + yIncrement }
+                                // elif yDiff = 1 then
+                                //     // Tail is only 1 away from Head in Y, but > 1 away in X. Move Tail diagonally to be
+                                //     //   just to the left or right of Head.
+                                //     let xIncrement = if newHeadLocation.X > tailLocation.X then 1 else -1
+                                //     let yIncrement = if newHeadLocation.Y > tailLocation.Y then 1 else -1
+                                //     { tailLocation with X = tailLocation.X + xIncrement; Y = tailLocation.Y + yIncrement }
+                                // else
+                                //     ()
                         
-                        ())
+                        match locationVisits.TryGetValue(newHeadLocation) with
+                        | true, visits ->
+                            locationVisits[newHeadLocation] <- { visits with HeadCount = visits.HeadCount + 1 }
+                        | false, _ -> ()
+                        
+                        match locationVisits.TryGetValue(newTailLocation) with
+                        | true, visits ->
+                            locationVisits[newTailLocation] <- { visits with TailCount = visits.TailCount + 1 }
+                        | false, _ -> ()
+                        
+                        (newHeadLocation, newTailLocation, locationVisits))
                     ()
                 
                 (headLocation, tailLocation, locationVisits)
