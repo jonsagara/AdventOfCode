@@ -84,18 +84,26 @@ module Day9 =
 
     let private getNewTailLocation newHeadLocation tailLocation =
         if newHeadLocation.X = tailLocation.X && newHeadLocation.Y = tailLocation.Y then
-            // Head moved to where Tail currently is. Leave Tail's location unchanged.
-            { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
+            // Head how shares the same location as Tail. Leave Tail's location unchanged.
+            tailLocation
         elif newHeadLocation.X = tailLocation.X then
-            // Head moved to the same X as Tail. They have different Ys. Move Tails's Y
-            //   one location closer to Head.
-            let increment = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
-            { tailLocation with Y = tailLocation.Y + increment }
+            // Head and Tail have the same horizontal position. If the Y distance is >= 2, then
+            //   move Tail one position closer to Head. Otherwise, leave Tail unchanged.
+            let yDiff = Math.Abs(newHeadLocation.Y - tailLocation.Y)
+            if yDiff > 1 then
+                let yIncrement = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
+                { tailLocation with Y = tailLocation.Y + yIncrement }
+            else
+                tailLocation
         elif newHeadLocation.Y = tailLocation.Y then
-            // Head moved to the same Y as Tail. They have different Xs. Move Tail's X
-            //   one location closer to Head.
-            let increment = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
-            { tailLocation with X = tailLocation.X + increment }
+            // Head and Tail have the same vertical position. If the X distance is >= 2, then
+            //   move Tail one position closer to Head. Otherwise, leave Tail unchanged.
+            let xDiff = Math.Abs(newHeadLocation.X - tailLocation.X)
+            if xDiff > 1 then
+                let xIncrement = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
+                { tailLocation with X = tailLocation.X + xIncrement }
+            else
+                tailLocation
         else
             // Head moved to a different X and Y than Tail. If they're not diagonally adjacent, move
             //   Tail diagonally to catch up to Head.
@@ -107,12 +115,46 @@ module Day9 =
                 // Tail is diagonally adjacent to Head. Tail can remain where it is.
                 { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
             else
-                // Tail is >= 1 away from Head in X and >= 1 away in Y. Regardless of the actual
+                // Tail is >= 1 away from Head in X or >= 1 away in Y. Regardless of the actual
                 //   distance, we're only going to move Tail diagonally one space to be just above or
                 //   below Head.
                 let xIncrement = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
                 let yIncrement = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
                 { tailLocation with X = tailLocation.X + xIncrement; Y = tailLocation.Y + yIncrement }
+
+    // This implementation is faulty. If Tail already touches Head or is diagonally adjacent,
+    //   then tail shouldn't move.
+    //let private getNewTailLocation newHeadLocation tailLocation =
+    //    if newHeadLocation.X = tailLocation.X && newHeadLocation.Y = tailLocation.Y then
+    //        // Head moved to where Tail currently is. Leave Tail's location unchanged.
+    //        { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
+    //    elif newHeadLocation.X = tailLocation.X then
+    //        // Head moved to the same X as Tail. They have different Ys. Move Tails's Y
+    //        //   one location closer to Head.
+    //        let increment = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
+    //        { tailLocation with Y = tailLocation.Y + increment }
+    //    elif newHeadLocation.Y = tailLocation.Y then
+    //        // Head moved to the same Y as Tail. They have different Xs. Move Tail's X
+    //        //   one location closer to Head.
+    //        let increment = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
+    //        { tailLocation with X = tailLocation.X + increment }
+    //    else
+    //        // Head moved to a different X and Y than Tail. If they're not diagonally adjacent, move
+    //        //   Tail diagonally to catch up to Head.
+    //        // They're diagonally adjacent if they're within 1 in the X and Y dimension.
+    //        let xDiff = Math.Abs(newHeadLocation.X - tailLocation.X)
+    //        let yDiff = Math.Abs(newHeadLocation.Y - tailLocation.Y)
+                                
+    //        if xDiff = 1 && yDiff = 1 then
+    //            // Tail is diagonally adjacent to Head. Tail can remain where it is.
+    //            { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
+    //        else
+    //            // Tail is >= 1 away from Head in X and >= 1 away in Y. Regardless of the actual
+    //            //   distance, we're only going to move Tail diagonally one space to be just above or
+    //            //   below Head.
+    //            let xIncrement = getTailCoordinateIncrement newHeadLocation.X tailLocation.X
+    //            let yIncrement = getTailCoordinateIncrement newHeadLocation.Y tailLocation.Y
+    //            { tailLocation with X = tailLocation.X + xIncrement; Y = tailLocation.Y + yIncrement }
 
     let run () =
 
