@@ -38,7 +38,8 @@ module Program =
                 //Day6.run()
                 //Day7.run();
                 //Day8.run();
-                Day9.run();
+                //Day9.run();
+                Day9Part2.run();
 
                 0
             with
