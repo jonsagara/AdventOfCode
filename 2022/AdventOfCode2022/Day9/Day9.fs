@@ -59,7 +59,7 @@ module Day9 =
 
         if headLocationDimension > tailLocationDimension then 1 else -1 
 
-    /// Increment the Head visit count at the give locations coordinates.
+    /// Increment the Head visit count at the given location coordinates.
     let private incrementHeadVisitCount (locationVisits : Dictionary<Location, Visit>) newHeadLocation =
         match locationVisits.TryGetValue(newHeadLocation) with
         | true, visits ->
@@ -79,9 +79,12 @@ module Day9 =
             // We're not yet tracking this location. Create a new visit count record.
             locationVisits.Add(newTailLocation, { HeadCount = 0; TailCount = 1 })
 
+    /// Move Tail so that it tracks Head according to the spec. Tail should always be touching or diagonally
+    ///   adjacent to Head.
+    /// Assumes that Head has already moved to its new location.
     let private getNewTailLocation newHeadLocation tailLocation =
         if newHeadLocation.X = tailLocation.X && newHeadLocation.Y = tailLocation.Y then
-            // Head how shares the same location as Tail. Leave Tail's location unchanged.
+            // Head now shares the same location as Tail. Leave Tail's location unchanged.
             tailLocation
         elif newHeadLocation.X = tailLocation.X then
             // Head and Tail have the same horizontal position. If the Y distance is >= 2, then
@@ -110,7 +113,7 @@ module Day9 =
                                 
             if xDiff = 1 && yDiff = 1 then
                 // Tail is diagonally adjacent to Head. Tail can remain where it is.
-                { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
+                tailLocation
             else
                 // Tail is >= 1 away from Head in X or >= 1 away in Y. Regardless of the actual
                 //   distance, we're only going to move Tail diagonally one space to be just above or
@@ -153,7 +156,7 @@ module Day9 =
 
                     [ 1 .. cmd.Count ]
                     |> List.fold (fun (headLoc, tailLoc, locVisits) _ -> 
-                            // Move Head one location Up and increment its visit count.
+                        // Move Head one location Up and increment its visit count.
                         let newHeadLoc = { headLoc with Y = headLoc.Y + 1 }
                         incrementHeadVisitCount locVisits newHeadLoc
 
