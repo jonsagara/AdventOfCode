@@ -85,6 +85,30 @@ module Day9 =
                 | Right ->
                     // Move Count steps to the Right, incrementing the Head and Tail visits
                     //   as appropriate.
+                    [ 1 .. cmd.Count ]
+                    |> List.iter (fun x ->
+                        // Move one location to the right.
+                        let newHeadLocation = { headLocation with X = headLocation.X + 1 }
+                        
+                        // Update the tail location to keep up with the head.
+                        let newTaiLocation =
+                            if newHeadLocation.X = tailLocation.X && newHeadLocation.Y = tailLocation.Y then
+                                // Head moved to where Tail currently is. Leave Tail's location unchanged.
+                                { tailLocation with X = tailLocation.X; Y = tailLocation.Y }
+                            else if newHeadLocation.X = tailLocation.X then
+                                // Head moved to the same X as Tail. They have different Ys. Move Tails's Y
+                                //   one location closer to Head.
+                                ()
+                            else if newHeadLocation.Y = tailLocation.Y then
+                                // Head moved to the same Y as Tail. They have different Xs. Move Tail's X
+                                //   one location closer to Head.
+                                ()
+                            else
+                                // Head move to a different X and Y than Tail. Move Tail diagonally to catch up
+                                //   to Head.
+                                ()
+                        
+                        ())
                     ()
                 
                 (headLocation, tailLocation, locationVisits)
