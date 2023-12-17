@@ -28,15 +28,7 @@ module Program =
                 let services = serviceScope.ServiceProvider
 
 
-                ////
-                //// Run the test service method.
-                ////
-
-                //let testSvc = services.GetRequiredService<TestService>()
-                //let html = testSvc.GetMicrosoftAsync() |> Async.AwaitTask |> Async.RunSynchronously
-
-                //let substringLength = if html.Length > 1_000 then 1_000 else html.Length
-                //printfn $"{html.Substring(0, substringLength)}"
+                Day1.run()                
 
                 0
             with

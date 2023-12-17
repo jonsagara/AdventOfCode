@@ -6,8 +6,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- Settings json files -->
 		<Content Include="*.json" CopyToOutputDirectory="PreserveNewest" />
 		<Compile Include="ConsoleHost.fs" />
+		<!-- All txt files in a Day folder -->
+		<Content Include="Day*\*.txt" CopyToOutputDirectory="PreserveNewest" />
+		<Compile Include="Day1\Day1.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>
 
