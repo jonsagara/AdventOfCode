@@ -14,20 +14,19 @@ module Day1 =
         Last : int option
         }
 
-    let private charNumericValue (ch : char) =
-        int(Char.GetNumericValue(ch))
+    let private toNumericValue c =
+        Char.GetNumericValue(c) |> int
 
     let private computeLineCalibrationValue (ln) =
         (10 * Option.get (ln.First)) + Option.get (ln.Last)
 
     let private updateFirstOrLast (state : LineFirstAndLastNumber) (currentDigitChar : char) =
-        if Option.isNone state.First then
-            { state with First = Some(currentDigitChar |> charNumericValue) }
-        else
-            { state with Last = Some (currentDigitChar |> charNumericValue) }
+        match state.First with
+        | None -> { state with First = Some(currentDigitChar |> toNumericValue) }
+        | Some _ -> { state with Last = Some (currentDigitChar |> toNumericValue) }
+
 
     let run () =
-
         let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1_input_sample.txt")
         let inputFileLines = File.ReadAllLines(inputFilePath)
         _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
@@ -35,19 +34,15 @@ module Day1 =
         let lineNumbers = 
             inputFileLines
             |> Array.map (fun line ->
-
                 let initialFirstAndLast = { First = None; Last = None }
                 
                 line.ToCharArray()
                 |> Array.filter Char.IsAsciiDigit
-                |> Array.fold updateFirstOrLast initialFirstAndLast
-                )
+                |> Array.fold updateFirstOrLast initialFirstAndLast)
             |> Array.map (fun firstAndLast ->
-                if Option.isNone firstAndLast.Last then
-                    { firstAndLast with Last = firstAndLast.First }
-                else
-                    firstAndLast
-                )
+                match firstAndLast.Last with
+                | None -> { firstAndLast with Last = firstAndLast.First }
+                | Some _ -> firstAndLast)
 
         let totalCalibrationValue = 
             lineNumbers
@@ -55,8 +50,3 @@ module Day1 =
             |> Array.sum
 
         _logger.Information( "The total calibration value is {TotalCalibrationValue}.", totalCalibrationValue)
-
-        ()
-
-
-
