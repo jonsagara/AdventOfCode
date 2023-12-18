@@ -28,7 +28,8 @@ module Program =
                 let services = serviceScope.ServiceProvider
 
 
-                Day1.run()                
+                //Day1.run()
+                Day1Part2.run()
 
                 0
             with

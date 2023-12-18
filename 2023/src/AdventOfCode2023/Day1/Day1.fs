@@ -27,7 +27,7 @@ module Day1 =
 
 
     let run () =
-        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1_input_sample.txt")
+        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1_input.txt")
         let inputFileLines = File.ReadAllLines(inputFilePath)
         _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
 
