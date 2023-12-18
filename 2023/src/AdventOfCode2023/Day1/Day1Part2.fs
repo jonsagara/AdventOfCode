@@ -16,7 +16,7 @@ module Day1Part2 =
         }
 
     [<Literal>]
-    let private _digitPattern = @"(?<digit>one|two|three|four|five|six|seven|eight|nine|\d)"
+    let private _digitPattern = @"(one|two|three|four|five|six|seven|eight|nine|\d)"
 
     let private _rxFirstDigit = Regex(_digitPattern, RegexOptions.Compiled)
     let private _rxLastDigit = Regex(_digitPattern, RegexOptions.Compiled ||| RegexOptions.RightToLeft)
@@ -44,7 +44,7 @@ module Day1Part2 =
 
 
     let run () =
-        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1Part2_input_sample.txt")
+        let inputFilePath = Path.Combine(__SOURCE_DIRECTORY__, "Day1Part2_input.txt")
         let inputFileLines = File.ReadAllLines(inputFilePath)
         _logger.Information("Lines read: {inputFileLinesLength}", inputFileLines.Length)
 
