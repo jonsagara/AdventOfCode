@@ -8,14 +8,13 @@
 	<ItemGroup>
 		<!-- Settings json files -->
 		<Content Include="*.json" CopyToOutputDirectory="PreserveNewest" />
-		<!-- All txt files in a Day folder -->
-		<Content Include="Day*\*.txt" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	
 	<ItemGroup>		
-		<Compile Include="ConsoleHost.fs" />
 		<Compile Include="Day1\Day1Part2.fs" />
 		<Compile Include="Day1\Day1.fs" />
+		<Content Include="Day1\*.txt" CopyToOutputDirectory="PreserveNewest" />
+		<Compile Include="ConsoleHost.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>
 
