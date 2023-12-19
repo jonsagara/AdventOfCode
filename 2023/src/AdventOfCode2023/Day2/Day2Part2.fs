@@ -10,11 +10,6 @@ module Day2Part2 =
     type private Marker = class end
     let private _logger = Log.Logger.ForContext(typeof<Marker>.DeclaringType)
 
-    // The bag has been loaded with this combination of cubes:
-    let private _redCubeMaxCount = 12
-    let private _greenCubeMaxCount = 13
-    let private _blueCubeMaxCount = 14
-
     type private Subset = {
         RedCubes : int
         GreenCubes : int
@@ -22,15 +17,8 @@ module Day2Part2 =
         }
 
     type private Game = {
-        Id : int
         Subsets : Subset[]
     }
-
-    let private _rxGameId = Regex(@"Game (?<id>\d+)", RegexOptions.Compiled ||| RegexOptions.IgnoreCase)
-
-    let private getGameId (game : string) =
-        int _rxGameId.Match(game).Groups["id"].Value
-
 
     let private _rxCountAndColor = Regex(@"(?<count>\d+) (?<color>red|green|blue)", RegexOptions.Compiled ||| RegexOptions.IgnoreCase)
 
@@ -55,7 +43,6 @@ module Day2Part2 =
             |> Array.map (fun line ->
                 // Split on ':' to separate the Game Id from the subsets of cubes.
                 let gameAndSubsets = line.Split(":", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
-                let gameId = getGameId gameAndSubsets[0]
 
                 // Split on ';' to separate the subsets.
                 let subsetStrings = gameAndSubsets[1].Split(";", StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
@@ -73,7 +60,7 @@ module Day2Part2 =
 
                         subset)
 
-                { Id = gameId; Subsets = subsets })
+                { Subsets = subsets })
 
         // For each game, select the max cubes per color. This is the minimum necessary to play each respective game.
         let minPossibleCubesPowersSum =
