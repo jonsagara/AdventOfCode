@@ -14,12 +14,16 @@
 		<Compile Include="Day1\Day1Part2.fs" />
 		<Compile Include="Day1\Day1.fs" />
 		<Content Include="Day1\*.txt" CopyToOutputDirectory="PreserveNewest" />
-		<Content Include="Day2\*.txt" CopyToOutputDirectory="PreserveNewest" />
 		<Compile Include="Day2\Day2Part2.fs" />
 		<Compile Include="Day2\Day2.fs" />
+		<Content Include="Day2\*.txt" CopyToOutputDirectory="PreserveNewest" />
+		<Compile Include="Day3\Day3.fs" />
+		<Content Include="Day3\*.txt" CopyToOutputDirectory="PreserveNewest" />
 		<Compile Include="ConsoleHost.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>
+	
+	<ItemGroup />
 
 	<ItemGroup>
 		<PackageReference Include="Sagara.Core.Logging.Serilog" Version="2.0.9" />

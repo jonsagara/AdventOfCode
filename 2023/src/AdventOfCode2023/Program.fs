@@ -31,7 +31,8 @@ module Program =
                 //Day1.run()
                 //Day1Part2.run()
                 //Day2.run()
-                Day2Part2.run()
+                //Day2Part2.run()
+                Day3.run()
 
                 0
             with
