@@ -34,18 +34,13 @@ module Day3 =
         let partNumbers =
             lines
             |> Array.mapi (fun ixRow line ->
-                let numberMatches = _rxNumber.Matches(line)
-            
-                let capturedNumbersOnLine = 
-                    numberMatches
+                // Get any numbers from this line of text. Process the matched numbers.
+                _rxNumber.Matches(line)
                     |> Seq.map (fun m ->
+                        // The first and only capture in the match has our number and its place within the string.
                         let capture = m.Captures |> Seq.head
-                        { Value = int capture.Value; StartIndex = capture.Index; EndIndex = capture.Index + capture.Length })
-                    |> Seq.toArray
+                        let capturedNum = { Value = int capture.Value; StartIndex = capture.Index; EndIndex = capture.Index + capture.Length }
 
-                let numbersOnLine =
-                    capturedNumbersOnLine
-                    |> Array.map (fun num ->
                         //
                         // Look at all of the characters surrounding a number, and store each character in a HashSet<char>.
                         //   When finished, if the hashset contains only a single '.' character, then the number is not 
@@ -60,28 +55,27 @@ module Day3 =
                         let addChar c = surroundingChars.Add c |> ignore
 
                         // Above (includes diagonal), if we're not on the first row.
-                        if ixRow > 0 then lines[ixRow - 1][num.StartIndex - 1 .. num.EndIndex] |> Seq.iter addChar
+                        if ixRow > 0 then lines[ixRow - 1][capturedNum.StartIndex - 1 .. capturedNum.EndIndex] |> Seq.iter addChar
 
                         // Left, on current line
-                        if num.StartIndex > 0 then line[num.StartIndex - 1] |> addChar
+                        if capturedNum.StartIndex > 0 then line[capturedNum.StartIndex - 1] |> addChar
 
                         // Right, on current line
-                        if num.EndIndex < line.Length then line[num.EndIndex] |> addChar
+                        if capturedNum.EndIndex < line.Length then line[capturedNum.EndIndex] |> addChar
 
                         // Below (includes diagonal), if we're not on the last row.
-                        if ixRow < lines.Length - 1 then lines[ixRow + 1][num.StartIndex - 1 .. num.EndIndex] |> Seq.iter addChar
+                        if ixRow < lines.Length - 1 then lines[ixRow + 1][capturedNum.StartIndex - 1 .. capturedNum.EndIndex] |> Seq.iter addChar
 
                         let isPartNumber = not(surroundingChars |> Seq.tryExactlyOne = Some '.')
 
-                        { Value = num.Value; IsPartNumber = isPartNumber })
-
-                numbersOnLine |> Array.filter _.IsPartNumber)
+                        { Value = capturedNum.Value; IsPartNumber = isPartNumber })
+                    |> Seq.filter _.IsPartNumber
+                    |> Seq.toArray)
             |> Array.filter (fun numsOnLine -> numsOnLine.Length > 0)
 
         let partNumberSum =
             partNumbers
-            |> Array.sumBy (fun partNums -> partNums |> Array.sumBy _.Value)
+            |> Array.collect id
+            |> Array.sumBy _.Value
 
         _logger.Information("Part number sum is {PartNumberSum}", partNumberSum)
-        ()
-        
